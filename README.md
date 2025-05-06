@@ -27,17 +27,19 @@ The microservices architecture consists of the following components:
 ```
 angus-microservices/
 ├── docker-compose.yml        # Docker Compose configuration
-├── deploy.sh                 # Deployment script for Linux/macOS
-├── deploy.bat                # Deployment script for Windows
+├── build_and_run.sh          # Build and run script for Linux/macOS
+├── build_and_run.bat         # Build and run script for Windows
 ├── README.md                 # This file
 ├── coral-service/            # Coral Protocol Service
 │   ├── Dockerfile            # Docker configuration
+│   ├── Dockerfile.fixed      # Fixed Docker configuration for dependency conflicts
 │   ├── requirements.txt      # Dependencies
 │   ├── app.py                # FastAPI application
 │   └── test_service.py       # Test script
 └── angus-core/               # Agent Angus Core Service
     ├── Dockerfile            # Docker configuration
     ├── requirements.txt      # Dependencies
+    ├── app.py                # Flask application
     ├── coral_client.py       # Client for Coral Protocol Service
     └── test_coral_integration.py  # Test script
 ```
@@ -53,7 +55,7 @@ angus-microservices/
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/angus-microservices.git
+   git clone https://github.com/MarkAustinGrow/angus-microservices.git
    cd angus-microservices
    ```
 
@@ -66,48 +68,69 @@ angus-microservices/
    CORAL_SERVER_URL=http://coral.pushcollective.club/sse
    ```
 
-3. **Deploy the services**
+3. **Build and run the services**
 
    On Linux/macOS:
    ```bash
-   chmod +x deploy.sh
-   ./deploy.sh
+   chmod +x build_and_run.sh
+   ./build_and_run.sh
    ```
 
    On Windows:
    ```
-   deploy.bat
+   build_and_run.bat
    ```
 
    This will:
+   - Create a Docker network
    - Build the Docker images for both services
    - Start the containers
-   - Run tests to verify that everything is working
+   - Set up the necessary connections between services
 
 4. **Verify the deployment**
 
    You can check if the services are running with:
 
    ```bash
-   docker-compose ps
+   docker ps
    ```
 
    You should see three containers running:
    - angus-core
    - coral-service
-   - db
+   - angus-db
 
-## API Documentation
+## Accessing the Services
 
-The Coral Protocol Service exposes the following REST API endpoints:
+Once the services are running, you can access them at:
 
-- `GET /` - Health check
-- `POST /agents/register` - Register an agent
-- `POST /messages/send` - Send a message
-- `GET /agents/list` - List available agents
-- `POST /threads/create` - Create a new thread
+- Agent Angus Core Service: http://localhost:8000
+- Coral Protocol Service: http://localhost:8001
 
-For detailed API documentation, see the [MICROSERVICES_DEPLOYMENT.md](MICROSERVICES_DEPLOYMENT.md) file.
+## Troubleshooting
+
+### Dependency Conflicts
+
+If you encounter dependency conflicts when building the Coral Protocol Service, the `build_and_run.sh` and `build_and_run.bat` scripts use a fixed Dockerfile (`Dockerfile.fixed`) that installs dependencies in a specific order to avoid conflicts.
+
+### Container Issues
+
+If you need to stop the containers, you can use:
+
+```bash
+docker stop angus-core coral-service angus-db
+docker rm angus-core coral-service angus-db
+```
+
+### Logs
+
+To view the logs for a specific container:
+
+```bash
+docker logs angus-core
+docker logs coral-service
+docker logs angus-db
+```
 
 ## Benefits of Microservices Architecture
 

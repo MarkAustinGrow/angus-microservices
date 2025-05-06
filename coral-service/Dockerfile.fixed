@@ -1,0 +1,25 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install anyio first to ensure we get the right version
+RUN pip install anyio>=4.5.0
+
+# Install FastAPI with a version that supports newer anyio
+RUN pip install fastapi>=0.104.0 uvicorn>=0.24.0
+
+# Install other dependencies
+RUN pip install langchain>=0.1.0 langchain-openai>=0.1.0 langchain-core>=0.3.36 \
+    langchain-community>=0.1.0 sseclient-py>=1.7.2 python-dotenv==1.0.0 pydantic>=2.0.0
+
+# Install MCP adapter last
+RUN pip install langchain-mcp-adapters==0.0.3
+
+# Copy the application code
+COPY . .
+
+# Expose the port the app runs on
+EXPOSE 8001
+
+# Command to run the application
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8001"]
