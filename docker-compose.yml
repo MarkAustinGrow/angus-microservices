@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  angus-core:
+    build:
+      context: ./angus_core
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - coral-service
+    environment:
+      - CORAL_SERVICE_URL=http://coral-service:8001
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=angus
+      - DB_PASSWORD=angus
+      - DB_NAME=angus
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+      - ./input:/app/input
+
+  coral-service:
+    build:
+      context: ./coral_service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+    environment:
+      - CORAL_SERVER_URL=${CORAL_SERVER_URL:-http://coral.pushcollective.club/sse}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=angus
+      - DB_PASSWORD=angus
+      - DB_NAME=angus
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+
+  db:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=angus
+      - POSTGRES_PASSWORD=angus
+      - POSTGRES_DB=angus
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
